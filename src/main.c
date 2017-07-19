@@ -7,13 +7,13 @@ struct wl_compositor *compositor = NULL;
 struct wl_shell *shell = NULL;
 
 void
-global_registory_handler(void *data,
-                         struct wl_registry *wl_registry,
-                         uint32_t name,
-                         const char *interface,
-                         uint32_t version)
+global_registry_handler(void *data,
+                        struct wl_registry *wl_registry,
+                        uint32_t name,
+                        const char *interface,
+                        uint32_t version)
 {
-    printf("global_registory_handler: %s, name %d, version %d\n",
+    printf("global_registry_handler: %s, name %d, version %d\n",
            interface, name, version);
     if (!strcmp(interface, "wl_compositor")) {
         compositor = wl_registry_bind(wl_registry, 
@@ -29,19 +29,19 @@ global_registory_handler(void *data,
 }
 
 void
-global_registory_remover(void *data,
-                         struct wl_registry *wl_registry,
-                         uint32_t name)
+global_registry_remover(void *data,
+                        struct wl_registry *wl_registry,
+                        uint32_t name)
 {
-    printf("global_registory_remover: name %d\n", name);
+    printf("global_registry_remover: name %d\n", name);
 }
 
 static void
 add_registry_listener(struct wl_display *display)
 {
     const struct wl_registry_listener registry_listener = {
-        global_registory_handler,
-        global_registory_remover
+        global_registry_handler,
+        global_registry_remover
     };
     struct wl_registry *registry = wl_display_get_registry(display);
     wl_registry_add_listener(registry, &registry_listener, NULL);
