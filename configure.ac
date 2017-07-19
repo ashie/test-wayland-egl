@@ -11,6 +11,13 @@ AM_INIT_AUTOMAKE([1.14 foreign])
 # Checks for programs.
 AC_PROG_CC
 
+if test "x$GCC" = "xyes"; then
+    case " $CFLAGS " in
+    -Wall) ;;
+    *) CFLAGS="$CFLAGS -Wall" ;;
+    esac
+fi
+
 # Checks for libraries.
 PKG_CHECK_MODULES(WAYLAND_CLIENT, [wayland-client >= 1.10])
 
