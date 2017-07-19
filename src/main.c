@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <wayland-client.h>
+
+struct wl_compositor *compositor = NULL;
+struct wl_shell *shell = NULL;
 
 void
 global_registory_handler(void *data,
@@ -11,6 +15,17 @@ global_registory_handler(void *data,
 {
     printf("global_registory_handler: %s, name %d, version %d\n",
            interface, name, version);
+    if (!strcmp(interface, "wl_compositor")) {
+        compositor = wl_registry_bind(wl_registry, 
+                                      name, 
+                                      &wl_compositor_interface, 
+                                      1);
+    } else if (!strcmp(interface, "wl_shell")) {
+        shell = wl_registry_bind(wl_registry, 
+                                 name, 
+                                 &wl_shell_interface, 
+                                 1);
+    }
 }
 
 void
@@ -21,8 +36,8 @@ global_registory_remover(void *data,
     printf("global_registory_remover: name %d\n", name);
 }
 
-void
-print_server_info(struct wl_display *display)
+static void
+add_registry_listener(struct wl_display *display)
 {
     const struct wl_registry_listener registry_listener = {
         global_registory_handler,
@@ -36,6 +51,17 @@ print_server_info(struct wl_display *display)
     printf("wl_display_roundtrip: n_events %d\n", n_events);
 }
 
+static struct wl_surface *
+create_surface(struct wl_compositor *compositor)
+{
+    struct wl_surface *surface = wl_compositor_create_surface(compositor);
+    if (surface)
+        printf("A surface is created: %p\n", surface);
+    else
+        printf("Failed to create surface!\n");
+    return surface;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -46,10 +72,16 @@ main(int argc, char *argv[])
     }
     printf("Connected to the display\n");
 
-    print_server_info(display);
+    add_registry_listener(display);
+
+    struct wl_surface *surface = create_surface(compositor);
+
+    wl_surface_destroy(surface);
+    wl_compositor_destroy(compositor);
+    wl_shell_destroy(shell);
 
     wl_display_disconnect(display);
     printf("Disconnected from the display\n");
-    
+
     return 0;
 }
